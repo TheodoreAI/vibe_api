@@ -10,5 +10,6 @@ gen
 env
 canto1.txt
 __pycache__
+test_api.py
 
 
