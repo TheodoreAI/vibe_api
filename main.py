@@ -12,7 +12,7 @@ from flask_cors import CORS, cross_origin
 # from csv import writer
 import nltk
 import json
-import requests
+# import requests
 
 nltk.download('vader_lexicon')
 from nltk.sentiment import SentimentIntensityAnalyzer
@@ -160,24 +160,25 @@ def post_request_movie_data_short():
     return sentiment_scores_short
 
 
-@server.route('/post-requests', methods=['POST'])
-def get_request():
-    json_object = {
-        "title": "Test1", "input_text": "Hello, testing, testing 1 2 3."
-    }
-
-    title = request.json['title']
-    input_text = request.json['input_text']
-
-    create_data = {'title': str(title), 'input_text': str(input_text)}
-
-    api_url = 'https://vibe-api-service.herokuapp.com/sentiment-analysis-long'
-    response = requests.post(
-        url=api_url, data=json.dumps(create_data), headers={'Content-Type': 'application/json'}
-    )
-    print(response.content)
-    return response.content
-
+# @server.route('/post-requests', methods=['POST'])
+# @cross_origin()
+# def get_request():
+#     json_object = {
+#         "title": "Test1", "input_text": "Hello, testing, testing 1 2 3."
+#     }
+#
+#     title = request.json['title']
+#     input_text = request.json['input_text']
+#
+#     create_data = {'title': str(title), 'input_text': str(input_text)}
+#
+#     api_url = 'https://vibe-api-service.herokuapp.com/sentiment-analysis-long'
+#     response = requests.post(
+#         url=api_url, data=json.dumps(create_data), headers={'Content-Type': 'application/json'}
+#     )
+#     print(response.content)
+#     return response.content
+#
 
 if __name__ == '__main__':
     server.run(debug=True, port=3000)
