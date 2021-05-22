@@ -118,7 +118,7 @@ class Sentiment:
 
 
 
-        if self.json_object['input_text'] is None:
+        if self.json_object['input_text'] is None or self.json_object is None:
             return self.json_object
         else:
             input_text = self.json_object['input_text']
