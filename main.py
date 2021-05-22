@@ -11,6 +11,8 @@ from flask_cors import CORS, cross_origin
 # import wikipedia
 # from csv import writer
 import nltk
+import json
+import requests
 
 nltk.download('vader_lexicon')
 from nltk.sentiment import SentimentIntensityAnalyzer
@@ -50,14 +52,10 @@ class Sentiment:
         title: title of something they want analyzed so that the data has a heading
         input_text: the actual text being analyzed"""
 
-        print("Text being analyzed: " + self.json_object['input_text'])
+
         input_text = self.json_object['input_text']
         sia = SentimentIntensityAnalyzer()
-        print(len(self.json_object))
-
         sentiment_scores = sia.polarity_scores(input_text)
-        print("scores " + str(sentiment_scores))
-
         return sentiment_scores
 
     def sentiment_analysis_sentence_stats(self, list_sentiment_values):
@@ -84,17 +82,31 @@ class Sentiment:
                 compound_list.append(obj['compound'])
 
         # Now I will find the average using the sum() and len() functions for each sentiment value
+        # if the length of the input string is too short, then I will return the sentiment_analysis_function() because that one can run short sentences.
+        if len(neg_list) == 0:
+            print("Running the short version of the analysis.")
+            return self.sentiment_analysis_function()
+        elif len(neu_list) == 0:
+            print("Running the short version of the analysis.")
+            return self.sentiment_analysis_function()
+        elif len(pos_list) == 0:
+            print("Running the short version of the analysis.")
+            return self.sentiment_analysis_function()
+        elif len(compound_list) == 0:
+            print("Running the short version of the analysis.")
+            return self.sentiment_analysis_function()
+        else:
+            print("Running the long version of the analysis.")
+            neg_avg = sum(neg_list) / len(neg_list)
+            neu_avg = sum(neu_list) / len(neu_list)
+            pos_avg = sum(pos_list) / len(pos_list)
+            compound_avg = sum(compound_list) / len(compound_list)
 
-        neg_avg = sum(neg_list) / len(neg_list)
-        neu_avg = sum(neu_list) / len(neu_list)
-        pos_avg = sum(pos_list) / len(pos_list)
-        compound_avg = sum(compound_list) / len(compound_list)
-
-        # Building my object again:
-        # Rounding to 3 decimals.
-        sentiment_object_n_sentences = {'neg': round(neg_avg, 3), 'neu': round(neu_avg, 3), 'pos': round(pos_avg, 3),
-                                        'compound': round(compound_avg, 3)}
-        return sentiment_object_n_sentences
+            # Building my object again:
+            # Rounding to 3 decimals.
+            sentiment_object_n_sentences = {'neg': round(neg_avg, 3), 'neu': round(neu_avg, 3), 'pos': round(pos_avg, 3),
+                                            'compound': round(compound_avg, 3)}
+            return sentiment_object_n_sentences
 
     def sentiment_analysis_per_sentence(self):
         """This function takes the json_object from the /sentiment-analysis-long url.
@@ -113,8 +125,6 @@ class Sentiment:
         sentiment_scores = []
         for sentence in sentences:
             sentiment_scores.append(sia.polarity_scores(sentence))
-
-        print(sentiment_scores)
 
         output_objects = self.sentiment_analysis_sentence_stats(
             sentiment_scores)  # summoning the following function to perform the statistics
@@ -146,6 +156,25 @@ def post_request_movie_data_short():
     sa = Sentiment(json_object)
     sentiment_scores_short = sa.sentiment_analysis_function()
     return sentiment_scores_short
+
+
+@server.route('/post-requests', methods=['POST'])
+def get_request():
+    json_object = {
+        "title": "Test1", "input_text": "Hello, testing, testing 1 2 3."
+    }
+
+    title = request.json['title']
+    input_text = request.json['input_text']
+
+    create_data = {'title': str(title), 'input_text': str(input_text)}
+
+    api_url = 'https://vibe-api-service.herokuapp.com/sentiment-analysis-long'
+    response = requests.post(
+        url=api_url, data=json.dumps(create_data), headers={'Content-Type': 'application/json'}
+    )
+    print(response.content)
+    return response.content
 
 
 if __name__ == '__main__':
