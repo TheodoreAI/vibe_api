@@ -116,11 +116,12 @@ class Sentiment:
         input_text: the actual text being analyzed
         Good parsing tip from: https://stackoverflow.com/questions/17618149/divide-string-by-line-break-or-period-with-python-regular-expressions"""
 
-        input_text = self.json_object['input_text']
+
 
         if self.json_object['input_text'] is None:
             return self.json_object
         else:
+            input_text = self.json_object['input_text']
 
             sentences = [x for x in map(str.strip, input_text.split('.')) if x]
 
