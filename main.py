@@ -2,6 +2,7 @@ import dash
 import flask
 from flask import request
 import dash_html_components as html
+from flask_cors import CORS, cross_origin
 # import pandas as pd
 # from flask import jsonify
 # import plotly.graph_objects as go
@@ -18,6 +19,8 @@ from nltk.sentiment import SentimentIntensityAnalyzer
 server = flask.Flask(__name__)
 app = dash.Dash(__name__, server=server)
 app.layout = html.Div('The Vibe Service:')
+
+CORS(server)
 
 
 class Sentiment:
