@@ -22,7 +22,7 @@ server = flask.Flask(__name__)
 app = dash.Dash(__name__, server=server)
 app.layout = html.Div('The Vibe Service:')
 
-CORS(server)
+CORS(app)
 
 
 class Sentiment:
