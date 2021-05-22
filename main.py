@@ -2,13 +2,13 @@ import dash
 import flask
 from flask import request
 import dash_html_components as html
-import pandas as pd
-from flask import jsonify
-import plotly.graph_objects as go
-import os
-from imdb import IMDb
-import wikipedia
-from csv import writer
+# import pandas as pd
+# from flask import jsonify
+# import plotly.graph_objects as go
+# import os
+# from imdb import IMDb
+# import wikipedia
+# from csv import writer
 from nltk.sentiment import SentimentIntensityAnalyzer
 
 # I'm going to pass my own Flask app server instance into Dash so I can make GET requests with Flask server
@@ -87,8 +87,6 @@ class Sentiment:
         # Building my object again:
         # Rounding to 3 decimals.
         sentiment_object_n_sentences = {'neg': round(neg_avg, 3), 'neu': round(neu_avg, 3), 'pos': round(pos_avg, 3), 'compound': round(compound_avg, 3)}
-
-
         return sentiment_object_n_sentences
 
 

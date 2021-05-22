@@ -8,5 +8,7 @@
 out
 gen
 env
+canto1.txt
+__pycache__
 
 
