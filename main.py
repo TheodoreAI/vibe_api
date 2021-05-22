@@ -9,6 +9,9 @@ import dash_html_components as html
 # from imdb import IMDb
 # import wikipedia
 # from csv import writer
+import nltk
+
+nltk.download('vader_lexicon')
 from nltk.sentiment import SentimentIntensityAnalyzer
 
 # I'm going to pass my own Flask app server instance into Dash so I can make GET requests with Flask server
@@ -79,16 +82,16 @@ class Sentiment:
 
         # Now I will find the average using the sum() and len() functions for each sentiment value
 
-        neg_avg = sum(neg_list)/len(neg_list)
-        neu_avg = sum(neu_list)/len(neu_list)
-        pos_avg = sum(pos_list)/len(pos_list)
-        compound_avg = sum(compound_list)/len(compound_list)
+        neg_avg = sum(neg_list) / len(neg_list)
+        neu_avg = sum(neu_list) / len(neu_list)
+        pos_avg = sum(pos_list) / len(pos_list)
+        compound_avg = sum(compound_list) / len(compound_list)
 
         # Building my object again:
         # Rounding to 3 decimals.
-        sentiment_object_n_sentences = {'neg': round(neg_avg, 3), 'neu': round(neu_avg, 3), 'pos': round(pos_avg, 3), 'compound': round(compound_avg, 3)}
+        sentiment_object_n_sentences = {'neg': round(neg_avg, 3), 'neu': round(neu_avg, 3), 'pos': round(pos_avg, 3),
+                                        'compound': round(compound_avg, 3)}
         return sentiment_object_n_sentences
-
 
     def sentiment_analysis_per_sentence(self):
         """This function takes the json_object from the /sentiment-analysis-long url.
@@ -114,8 +117,6 @@ class Sentiment:
             sentiment_scores)  # summoning the following function to perform the statistics
 
         return output_objects
-
-
 
 
 @server.route('/sentiment-analysis-long', methods=['POST'])
