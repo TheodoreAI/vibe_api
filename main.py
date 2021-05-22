@@ -117,19 +117,24 @@ class Sentiment:
         Good parsing tip from: https://stackoverflow.com/questions/17618149/divide-string-by-line-break-or-period-with-python-regular-expressions"""
 
         input_text = self.json_object['input_text']
-        sentences = [x for x in map(str.strip, input_text.split('.')) if x]
 
-        sia = SentimentIntensityAnalyzer()
-        # Getting the values:
-        # Setting a list to hold all the sentiment_scores
-        sentiment_scores = []
-        for sentence in sentences:
-            sentiment_scores.append(sia.polarity_scores(sentence))
+        if self.json_object['input_text'] is None:
+            return self.json_object
+        else:
 
-        output_objects = self.sentiment_analysis_sentence_stats(
-            sentiment_scores)  # summoning the following function to perform the statistics
+            sentences = [x for x in map(str.strip, input_text.split('.')) if x]
 
-        return output_objects
+            sia = SentimentIntensityAnalyzer()
+            # Getting the values:
+            # Setting a list to hold all the sentiment_scores
+            sentiment_scores = []
+            for sentence in sentences:
+                sentiment_scores.append(sia.polarity_scores(sentence))
+
+            output_objects = self.sentiment_analysis_sentence_stats(
+                sentiment_scores)  # summoning the following function to perform the statistics
+
+            return output_objects
 
 
 @server.route('/sentiment-analysis-long', methods=['POST'])
