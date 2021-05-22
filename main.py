@@ -22,7 +22,7 @@ server = flask.Flask(__name__)
 app = dash.Dash(__name__, server=server)
 app.layout = html.Div('The Vibe Service:')
 
-CORS(app)
+CORS(server)
 
 
 class Sentiment:
@@ -133,6 +133,7 @@ class Sentiment:
 
 
 @server.route('/sentiment-analysis-long', methods=['POST'])
+@cross_origin()
 def post_request_data_long():
     """This GET request will take two parameters: title and string in that order.
     Learned to use post requests on flask using: https://www.digitalocean.com/community/tutorials/processing-incoming-request-data-in-flask"""
@@ -148,6 +149,7 @@ def post_request_data_long():
 
 
 @server.route('/sentiment-analysis-short', methods=['POST'])
+@cross_origin()
 def post_request_movie_data_short():
     """This route handles the request for data analysis for string examples of max 500 characters long."""
     json_object = request.get_json()
