@@ -12,7 +12,7 @@ from flask_cors import CORS, cross_origin
 # from csv import writer
 import nltk
 import json
-# import requests
+import requests
 
 nltk.download('vader_lexicon')
 from nltk.sentiment import SentimentIntensityAnalyzer
@@ -58,6 +58,16 @@ class Sentiment:
         sentiment_scores = sia.polarity_scores(input_text)
         return sentiment_scores
 
+    def normalization_function(self, neg_list, pos_list, neu_list, compound_list):
+        """I have to normalize the data.
+        :argument neg_list arrtype
+        :argument pos_list arrtype
+        et el"""
+
+        pass
+
+
+
     def sentiment_analysis_sentence_stats(self, list_sentiment_values):
         """This takes a list of sentiment values (list of dictionary objects)
         It will output the average of the pos, neg, neu, compound for each sentence:
@@ -96,14 +106,24 @@ class Sentiment:
             print("Running the short version of the analysis.")
             return self.sentiment_analysis_function()
         else:
+
+
+
             print("Running the long version of the analysis.")
             neg_avg = sum(neg_list) / len(neg_list)
             neu_avg = sum(neu_list) / len(neu_list)
             pos_avg = sum(pos_list) / len(pos_list)
             compound_avg = sum(compound_list) / len(compound_list)
 
+            # normalize the data for the long version:
+
+            array_to_normalize = [neg_avg, neu_avg, pos_avg]
+
+
+
             # Building my object again:
             # Rounding to 3 decimals.
+
             sentiment_object_n_sentences = {'neg': round(neg_avg, 3), 'neu': round(neu_avg, 3), 'pos': round(pos_avg, 3),
                                             'compound': round(compound_avg, 3)}
             return sentiment_object_n_sentences
@@ -166,25 +186,25 @@ def post_request_movie_data_short():
     return sentiment_scores_short
 
 
-# @server.route('/post-requests', methods=['POST'])
-# @cross_origin()
-# def get_request():
-#     json_object = {
-#         "title": "Test1", "input_text": "Hello, testing, testing 1 2 3."
-#     }
-#
-#     title = request.json['title']
-#     input_text = request.json['input_text']
-#
-#     create_data = {'title': str(title), 'input_text': str(input_text)}
-#
-#     api_url = 'https://vibe-api-service.herokuapp.com/sentiment-analysis-long'
-#     response = requests.post(
-#         url=api_url, data=json.dumps(create_data), headers={'Content-Type': 'application/json'}
-#     )
-#     print(response.content)
-#     return response.content
-#
+@server.route('/post-requests', methods=['POST'])
+@cross_origin()
+def get_request():
+    json_object = {
+        "title": "Test1", "input_text": "Hello, testing, testing 1 2 3."
+    }
+
+    title = request.json['title']
+    input_text = request.json['input_text']
+
+    create_data = {'title': str(title), 'input_text': str(input_text)}
+
+    api_url = 'https://vibe-api-service.herokuapp.com/sentiment-analysis-long'
+    response = requests.post(
+        url=api_url, data=json.dumps(create_data), headers={'Content-Type': 'application/json'}
+    )
+    print(response.content)
+    return response.content
+
 
 if __name__ == '__main__':
     server.run(debug=True, port=3000)
