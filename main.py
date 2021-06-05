@@ -1,19 +1,16 @@
 import dash
 import flask
-from flask import request
+from flask import request, jsonify
 import dash_html_components as html
 from flask_cors import CORS, cross_origin
-# import pandas as pd
-# from flask import jsonify
-# import plotly.graph_objects as go
-# import os
-# from imdb import IMDb
-# import wikipedia
-# from csv import writer
 import nltk
 import json
 import requests
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
 
+nltk.download('stopwords')
+nltk.download('punkt')
 nltk.download('vader_lexicon')
 from nltk.sentiment import SentimentIntensityAnalyzer
 
@@ -32,19 +29,15 @@ class Sentiment:
     sentiment_analysis_per_sentence() will rely on parsing the input string from one period to the next and analyzing each sentence.
     sentiment_analysis_sentence_stats() will take an average of the neg, pos, neu, compound value and output this.
 
-    Future To Do:
-    1. Add a stopwords() functionality that removes stopwords: stopwords are english words that don't change the meaning of sentences and can be removed.
-    2. Implement the stop words on the input text object
-    3. Run the new analysis
-
     """
 
     def __init__(self, json_object):
         self.json_object = json_object
 
-    def print_json_object(self):
-        """This function will begin the sentiment analysis."""
-        print(self.json_object)
+    def get_string_from_object(self):
+        """Returns the string object."""
+
+        return self.json_object
 
     def sentiment_analysis_function(self):
         """This function takes the json_object and performs a sentiment analysis using the nltk
@@ -52,21 +45,10 @@ class Sentiment:
         title: title of something they want analyzed so that the data has a heading
         input_text: the actual text being analyzed"""
 
-
         input_text = self.json_object['input_text']
         sia = SentimentIntensityAnalyzer()
         sentiment_scores = sia.polarity_scores(input_text)
         return sentiment_scores
-
-    def normalization_function(self, neg_list, pos_list, neu_list, compound_list):
-        """I have to normalize the data.
-        :argument neg_list arrtype
-        :argument pos_list arrtype
-        et el"""
-
-        pass
-
-
 
     def sentiment_analysis_sentence_stats(self, list_sentiment_values):
         """This takes a list of sentiment values (list of dictionary objects)
@@ -107,24 +89,18 @@ class Sentiment:
             return self.sentiment_analysis_function()
         else:
 
-
-
             print("Running the long version of the analysis.")
             neg_avg = sum(neg_list) / len(neg_list)
             neu_avg = sum(neu_list) / len(neu_list)
             pos_avg = sum(pos_list) / len(pos_list)
             compound_avg = sum(compound_list) / len(compound_list)
 
-            # normalize the data for the long version:
-
             array_to_normalize = [neg_avg, neu_avg, pos_avg]
-
-
 
             # Building my object again:
             # Rounding to 3 decimals.
-
-            sentiment_object_n_sentences = {'neg': round(neg_avg, 3), 'neu': round(neu_avg, 3), 'pos': round(pos_avg, 3),
+            sentiment_object_n_sentences = {'neg': round(neg_avg, 3), 'neu': round(neu_avg, 3),
+                                            'pos': round(pos_avg, 3),
                                             'compound': round(compound_avg, 3)}
             return sentiment_object_n_sentences
 
@@ -135,8 +111,6 @@ class Sentiment:
         title: title of something they want analyzed so that the data has a heading
         input_text: the actual text being analyzed
         Good parsing tip from: https://stackoverflow.com/questions/17618149/divide-string-by-line-break-or-period-with-python-regular-expressions"""
-
-
 
         if self.json_object['input_text'] is None or self.json_object is None:
             return self.json_object
@@ -156,6 +130,36 @@ class Sentiment:
                 sentiment_scores)  # summoning the following function to perform the statistics
 
             return output_objects
+
+    def remove_punctuation(self, plot_str):
+        """Removes the punctuation from string.
+        Source: https://www.programiz.com/python-programming/examples/remove-punctuation"""
+
+        punc = '''!()-[]{};:'"\,<>./?@#$%^&*_~'''
+
+        no_punc = ""
+        for char in plot_str:
+            if char not in punc:
+                no_punc = no_punc + char
+
+        return no_punc
+
+    def remove_stopwords(self, plot_str):
+        """Removes the stopwords from my string."""
+
+        plot_without_punc = self.remove_punctuation(plot_str)
+
+        stop_words = set(stopwords.words('english'))
+        word_tokens = word_tokenize(plot_without_punc)
+        filtered_plot = [w for w in word_tokens if not w.lower() in stop_words]
+        filtered_plot = []
+
+        # remove stop words
+        for w in word_tokens:
+            if w not in stop_words:
+                filtered_plot.append(w)
+        string_plot = ' '.join(filtered_plot)
+        return string_plot
 
 
 @server.route('/sentiment-analysis-long', methods=['POST'])
@@ -187,23 +191,15 @@ def post_request_movie_data_short():
 
 
 @server.route('/post-requests', methods=['POST'])
-@cross_origin()
-def get_request():
-    json_object = {
-        "title": "Test1", "input_text": "Hello, testing, testing 1 2 3."
-    }
-
-    title = request.json['title']
-    input_text = request.json['input_text']
-
-    create_data = {'title': str(title), 'input_text': str(input_text)}
-
-    api_url = 'https://vibe-api-service.herokuapp.com/sentiment-analysis-long'
-    response = requests.post(
-        url=api_url, data=json.dumps(create_data), headers={'Content-Type': 'application/json'}
-    )
-    print(response.content)
-    return response.content
+@cross_origin(allow_headers=['Content-Type'])
+def post_request_user():
+    json_object = request.get_json()
+    sa = Sentiment(json_object)
+    string_plot = sa.get_string_from_object()['input_text']
+    filtered_txt = sa.remove_stopwords(string_plot)
+    sia = SentimentIntensityAnalyzer()
+    dict_out = sia.polarity_scores(filtered_txt)
+    return dict_out
 
 
 if __name__ == '__main__':
